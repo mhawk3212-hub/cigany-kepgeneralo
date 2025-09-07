@@ -3,145 +3,144 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>AAAAAAAAAAAAAAAAAAAAAAAAAAAA</title>
+<title>Mini AI Image Generator</title>
 <style>
-  :root {
-    --bg: #0b0f14;
-    --accent: #7c3aed;
-    --muted: #9aa4b2;
-  }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: #e6eef8;
-    font-family: Inter, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-    background-image:
-      radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-  .card {
-    width: min(900px, 95%);
-    background: rgba(255,255,255,0.03);
-    border-radius: 14px;
-    padding: 18px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: center;
-  }
-  h2 { margin: 0; }
-  #result {
-    width: 100%;
-    max-height: 70vh;
-    object-fit: contain;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.05);
-  }
-  .prompt-bar {
-    width: 100%;
-    display: flex;
-    gap: 8px;
-  }
-  .prompt-bar input {
-    flex: 1;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    background: rgba(255,255,255,0.05);
-    color: inherit;
-    font-size: 16px;
-  }
-  .prompt-bar button {
-    background: linear-gradient(180deg, var(--accent), #5728c7);
-    color: white;
-    border: none;
-    padding: 12px 16px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-  }
-  .prompt-bar button:disabled {
-    opacity: 0.6;
-    cursor: default;
-  }
-  #status { font-size: 14px; color: var(--muted); }
+:root {
+  --bg: #0b0f14;
+  --accent: #7c3aed;
+  --muted: #9aa4b2;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: #e6eef8;
+  font-family: Inter, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.card {
+  width: min(900px, 95%);
+  background: rgba(255,255,255,0.03);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+h2 { margin: 0; }
+#result {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+}
+.prompt-bar {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+}
+.prompt-bar input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.05);
+  color: inherit;
+  font-size: 16px;
+}
+.prompt-bar button {
+  background: linear-gradient(180deg, var(--accent), #5728c7);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.prompt-bar button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+#status { font-size: 14px; color: var(--muted); }
 </style>
 </head>
 <body>
-  <div class="card">
-    <h2>kép generáló (sigma)</h2>
-    <img id="result" alt="Generated image will appear here" />
-    <div class="prompt-bar">
-      <input id="prompt" type="text" placeholder="Type your prompt here..." />
-      <button id="go">generálj!</button>
-    </div>
-    <div id="status"></div>
-  </div>
+<div class="card">
+<h2>Mini AI Image Generator</h2>
+<img id="result" alt="Generated image will appear here" />
+<div class="prompt-bar">
+<input id="prompt" type="text" placeholder="Type your prompt here..." />
+<button id="go">Generate</button>
+</div>
+<div id="status"></div>
+</div>
 
 <script>
-  // 🔑 Put your Hugging Face token here
-  const HF_TOKEN = "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";
-  // Choose a model (this is Stable Diffusion 2, you can change it)
-  const MODEL_ID = "stabilityai/stable-diffusion-2";
+// 🔑 Put your Hugging Face token here
+const HF_TOKEN = "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";
+const MODEL_ID = "stabilityai/stable-diffusion-2";
 
-  const goBtn = document.getElementById("go");
-  const promptInput = document.getElementById("prompt");
-  const resultImg = document.getElementById("result");
-  const status = document.getElementById("status");
+const goBtn = document.getElementById("go");
+const promptInput = document.getElementById("prompt");
+const resultImg = document.getElementById("result");
+const status = document.getElementById("status");
 
-  async function generate() {
-    const prompt = promptInput.value.trim();
-    if (!prompt) return alert("Please enter a prompt.");
+async function generate() {
+  const prompt = promptInput.value.trim();
+  if (!prompt) return alert("Please enter a prompt.");
 
-    goBtn.disabled = true;
-    status.textContent = "Generating... (may take 5–20s)";
-    resultImg.src = "";
+  goBtn.disabled = true;
+  status.textContent = "Generating... (may take 5–20s)";
+  resultImg.src = "";
 
-    try {
-      const res = await fetch(
-        `https://api-inference.huggingface.co/models/${MODEL_ID}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${HF_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ inputs: prompt }),
-        }
-      );
-
-      const contentType = res.headers.get("content-type") || "";
-      if (contentType.startsWith("image/")) {
-        const blob = await res.blob();
-        resultImg.src = URL.createObjectURL(blob);
-        status.textContent = "Done!";
-      } else {
-        const err = await res.text();
-        throw new Error(err);
+  try {
+    const res = await fetch(
+      `https://api-inference.huggingface.co/models/${MODEL_ID}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${HF_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ inputs: prompt }),
       }
-    } catch (err) {
-      console.error(err);
-      status.textContent = "Error: " + err.message;
-      alert("Error: " + err.message);
-    } finally {
-      goBtn.disabled = false;
+    );
+
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.startsWith("image/")) {
+      const blob = await res.blob();
+      resultImg.src = URL.createObjectURL(blob);
+      status.textContent = "Done!";
+    } else {
+      const err = await res.text();
+      throw new Error(err);
     }
+  } catch (err) {
+    console.error(err);
+    status.textContent = "Error: " + err.message;
+    alert("Error: " + err.message);
+  } finally {
+    goBtn.disabled = false;
   }
+}
 
-  goBtn.addEventListener("click", generate);
-  promptInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") generate();
-  });
+goBtn.addEventListener("click", generate);
+promptInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") generate();
+});
 
-
-  promptInput.value = "A low-poly 2000s style cat and dog facing upwards, purple background, desaturated";
+// Example starting prompt
+promptInput.value = "A low-poly 2000s style cat and dog facing upwards, purple background, desaturated";
 </script>
 </body>
 </html>
