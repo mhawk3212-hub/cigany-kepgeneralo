@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ok garmin</title>
+<title>Mini AI Image Generator</title>
 <style>
 :root {
   --bg: #0b0f14;
@@ -76,7 +76,7 @@ h2 { margin: 0; }
 </head>
 <body>
 <div class="card">
-<h2>AI kep generalo, naon szigma</h2>
+<h2>AI kép generalo (szigma)</h2>
 <img id="result" alt="Generated image will appear here" />
 <div class="prompt-bar">
 <input id="prompt" type="text" placeholder="Type your prompt here..." />
@@ -86,10 +86,6 @@ h2 { margin: 0; }
 </div>
 
 <script>
-// 🔑 Put your Hugging Face token here
-const HF_TOKEN = "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";
-const MODEL_ID = "stabilityai/stable-diffusion-2";
-
 const goBtn = document.getElementById("go");
 const promptInput = document.getElementById("prompt");
 const resultImg = document.getElementById("result");
@@ -104,27 +100,20 @@ async function generate() {
   resultImg.src = "";
 
   try {
-    const res = await fetch(
-      `https://api-inference.huggingface.co/models/${MODEL_ID}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${HF_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ inputs: prompt }),
-      }
-    );
+    const res = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
 
-    const contentType = res.headers.get("content-type") || "";
-    if (contentType.startsWith("image/")) {
-      const blob = await res.blob();
-      resultImg.src = URL.createObjectURL(blob);
-      status.textContent = "Done!";
-    } else {
-      const err = await res.text();
-      throw new Error(err);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text);
     }
+
+    const blob = await res.blob();
+    resultImg.src = URL.createObjectURL(blob);
+    status.textContent = "Done!";
   } catch (err) {
     console.error(err);
     status.textContent = "Error: " + err.message;
@@ -140,7 +129,7 @@ promptInput.addEventListener("keydown", (e) => {
 });
 
 // Example starting prompt
-promptInput.value = "Porfilkém szigma férfiaknak";
+promptInput.value = "szigma profilok férfiaknak";
 </script>
 </body>
 </html>
